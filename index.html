@@ -24,7 +24,7 @@
 
     <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-8 text-center border-t-4 border-blue-500 card-enter">
         <h1 class="text-2xl font-bold text-gray-800 mb-2">Tebak Kosa Kata 🧠</h1>
-        <p class="text-gray-500 mb-6 text-sm">Ketik terjemahan dari kata di bawah ini (Inggris ↔ Indonesia).</p>
+        <p class="text-gray-500 mb-6 text-sm">Ketik terjemahan dari kata di bawah ini (Inggris ➔ Indonesia).</p>
 
         <div class="flex justify-between items-center mb-6 bg-blue-50 p-3 rounded-lg">
             <span class="font-semibold text-blue-800">Skor: <span id="score" class="text-xl">0</span></span>
@@ -32,22 +32,25 @@
         </div>
 
         <div class="mb-8">
-            <h2 class="text-sm text-gray-400 font-semibold uppercase tracking-wider mb-2" id="question-label">Terjemahkan ke <span id="target-lang">...</span></h2>
+            <h2 class="text-sm text-gray-400 font-semibold uppercase tracking-wider mb-2" id="question-label">Terjemahkan ke <span id="target-lang">Bahasa Indonesia</span></h2>
             <div id="question-word" class="text-3xl font-bold text-gray-800 break-words min-h-[40px]">
                 Loading...
             </div>
         </div>
 
-        <div class="relative">
+        <div class="w-full">
             <input type="text" id="answer-input" 
                 class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 text-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-center"
                 placeholder="Ketik jawabanmu di sini..." autocomplete="off" autofocus>
             
-            <p id="feedback-msg" class="absolute left-0 right-0 -bottom-8 text-sm font-bold opacity-0 transition-opacity"></p>
+            <!-- Tempat feedback sekarang di dalam kotak, tidak akan terpotong layar -->
+            <div class="min-h-[30px] mt-2 flex items-center justify-center">
+                <p id="feedback-msg" class="text-sm font-bold opacity-0 transition-opacity"></p>
+            </div>
         </div>
 
         <button id="submit-btn" onclick="checkAnswer()" 
-            class="mt-12 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition-colors shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+            class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition-colors shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
             Jawab (Enter)
         </button>
         
@@ -77,7 +80,6 @@
         ];
 
         let currentVocab = null;
-        let isAskingEnglish = true; // true = tampilkan ID, tanya EN. false = tampilkan EN, tanya ID
         let score = 0;
         let isWaiting = false;
 
@@ -93,16 +95,8 @@
             const randomIndex = Math.floor(Math.random() * vocabularies.length);
             currentVocab = vocabularies[randomIndex];
             
-            // Acak arah terjemahan (50% peluang)
-            isAskingEnglish = Math.random() > 0.5;
-
-            if (isAskingEnglish) {
-                targetLangEl.textContent = "Bahasa Inggris";
-                questionWordEl.textContent = currentVocab.id;
-            } else {
-                targetLangEl.textContent = "Bahasa Indonesia";
-                questionWordEl.textContent = currentVocab.en;
-            }
+            // Selalu tampilkan bahasa Inggris
+            questionWordEl.textContent = currentVocab.en;
 
             answerInput.value = "";
             answerInput.disabled = false;
@@ -119,7 +113,7 @@
             if (isWaiting || !currentVocab || answerInput.value.trim() === "") return;
 
             const userAnswer = cleanString(answerInput.value);
-            const correctAnswer = isAskingEnglish ? cleanString(currentVocab.en) : cleanString(currentVocab.id);
+            const correctAnswer = cleanString(currentVocab.id);
 
             isWaiting = true;
             answerInput.disabled = true;
@@ -136,7 +130,7 @@
                 // Jawaban Salah
                 score = Math.max(0, score - 5); // Kurangi skor tapi tidak minus
                 scoreEl.textContent = score;
-                showFeedback(`Salah! Jawaban yang benar: "${isAskingEnglish ? currentVocab.en : currentVocab.id}"`, "text-red-500");
+                showFeedback(`Salah! Jawaban yang benar: "${currentVocab.id}"`, "text-red-500");
                 
                 // Beri waktu lebih lama untuk membaca jawaban yang benar
                 setTimeout(generateQuestion, 2500);
@@ -145,14 +139,14 @@
 
         function skipQuestion() {
             if (isWaiting) return;
-            showFeedback(`Dilewati. Jawaban: "${isAskingEnglish ? currentVocab.en : currentVocab.id}"`, "text-orange-500");
+            showFeedback(`Dilewati. Jawaban: "${currentVocab.id}"`, "text-orange-500");
             isWaiting = true;
             setTimeout(generateQuestion, 1500);
         }
 
         function showFeedback(text, colorClass) {
             feedbackMsg.textContent = text;
-            feedbackMsg.className = `absolute left-0 right-0 -bottom-8 text-sm font-bold transition-opacity opacity-100 ${colorClass}`;
+            feedbackMsg.className = `text-sm font-bold transition-opacity opacity-100 ${colorClass}`;
         }
 
         function hideFeedback() {
@@ -180,4 +174,3 @@
     </script>
 </body>
 </html>
-```
